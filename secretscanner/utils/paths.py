@@ -6,9 +6,13 @@ from pathlib import Path
 
 BINARY_SUFFIXES = {
     ".7z",
+    ".aab",
+    ".apk",
     ".avi",
     ".bmp",
     ".db",
+    ".class",
+    ".dex",
     ".dll",
     ".dylib",
     ".exe",
@@ -17,6 +21,7 @@ BINARY_SUFFIXES = {
     ".gz",
     ".ico",
     ".jpeg",
+    ".jar",
     ".jpg",
     ".m4a",
     ".mov",

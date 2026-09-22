@@ -27,6 +27,10 @@ class AllowlistConfig:
 class ScannerConfig:
     max_file_size_mb: int = 5
     entropy: bool = True
+    workers: int = 4
+    max_files: int = 50_000
+    timeout_seconds: int | None = None
+    max_findings_per_rule_per_file: int = 20
     exclude: list[str] = field(default_factory=list)
     allowlist: AllowlistConfig = field(default_factory=AllowlistConfig)
     follow_symlinks: bool = False
@@ -66,9 +70,16 @@ def load_config(
     exclude = data.get("exclude", scan.get("exclude", [])) or []
     config = ScannerConfig(
         max_file_size_mb=_positive_int(scan.get("max_file_size_mb", 5), "scan.max_file_size_mb"),
-        entropy=bool(scan.get("entropy", True)),
+        entropy=_boolean(scan.get("entropy", True), "scan.entropy"),
+        workers=_positive_int(scan.get("workers", 4), "scan.workers"),
+        max_files=_positive_int(scan.get("max_files", 50_000), "scan.max_files"),
+        timeout_seconds=_optional_positive_int(scan.get("timeout_seconds"), "scan.timeout_seconds"),
+        max_findings_per_rule_per_file=_positive_int(
+            scan.get("max_findings_per_rule_per_file", 20),
+            "scan.max_findings_per_rule_per_file",
+        ),
         exclude=_string_list(exclude, "exclude"),
-        follow_symlinks=bool(scan.get("follow_symlinks", False)),
+        follow_symlinks=_boolean(scan.get("follow_symlinks", False), "scan.follow_symlinks"),
         allowlist=AllowlistConfig(
             paths=_string_list(allow.get("paths", []), "allowlist.paths"),
             rules=set(_string_list(allow.get("rules", []), "allowlist.rules")),
@@ -84,6 +95,18 @@ def load_config(
 def _positive_int(value: Any, name: str) -> int:
     if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
         raise ConfigurationError(f"{name} must be a positive integer.")
+    return value
+
+
+def _optional_positive_int(value: Any, name: str) -> int | None:
+    if value is None:
+        return None
+    return _positive_int(value, name)
+
+
+def _boolean(value: Any, name: str) -> bool:
+    if not isinstance(value, bool):
+        raise ConfigurationError(f"{name} must be a boolean.")
     return value
 
 

@@ -9,6 +9,8 @@ from collections import Counter
 from secretscanner.rules.validators import not_uuid_or_hash
 
 TOKEN_PATTERN = re.compile(r"(?<![A-Za-z0-9])[A-Za-z0-9_+/=-]{20,}(?![A-Za-z0-9])")
+MAX_LINE_LENGTH = 20_000
+MAX_CANDIDATES_PER_LINE = 5
 
 
 def shannon_entropy(value: str) -> float:
@@ -21,7 +23,7 @@ def shannon_entropy(value: str) -> float:
 
 def entropy_candidates(line: str) -> list[tuple[int, str, float]]:
     candidates: list[tuple[int, str, float]] = []
-    if "://" in line:
+    if "://" in line or len(line) > MAX_LINE_LENGTH:
         return candidates
     for match in TOKEN_PATTERN.finditer(line):
         value = match.group(0).rstrip("=")
@@ -38,4 +40,6 @@ def entropy_candidates(line: str) -> list[tuple[int, str, float]]:
         score = shannon_entropy(value)
         if score >= threshold:
             candidates.append((match.start(), value, score))
+            if len(candidates) >= MAX_CANDIDATES_PER_LINE:
+                break
     return candidates

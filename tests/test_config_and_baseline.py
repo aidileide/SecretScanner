@@ -49,6 +49,12 @@ def test_invalid_enabled_type_is_rejected(tmp_path: Path) -> None:
         load_config(tmp_path)
 
 
+def test_invalid_scan_boolean_is_rejected(tmp_path: Path) -> None:
+    (tmp_path / ".secretscanner.yml").write_text("scan:\n  entropy: yes-please\n", encoding="utf-8")
+    with pytest.raises(ConfigurationError, match="scan.entropy must be a boolean"):
+        load_config(tmp_path)
+
+
 def test_baseline_contains_no_secret_and_filters_finding(
     scanner: SecretScanner, tmp_path: Path
 ) -> None:

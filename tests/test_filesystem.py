@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from secretscanner.exceptions import SecretScannerError
+from secretscanner.models import ScanProgress
 from secretscanner.scanner.engine import SecretScanner
 
 
@@ -44,3 +45,28 @@ def test_symlink_is_not_followed_by_default(scanner: SecretScanner, tmp_path: Pa
         pytest.skip("Symlink creation is unavailable on this system")
     result = scanner.scan_path(link)
     assert result.findings == []
+
+
+def test_parallel_scan_reports_progress(scanner: SecretScanner, tmp_path: Path) -> None:
+    for index in range(6):
+        (tmp_path / f"file-{index}.txt").write_text("safe\n", encoding="utf-8")
+    updates: list[ScanProgress] = []
+
+    result = scanner.scan_path(tmp_path, workers=3, progress=updates.append)
+
+    assert result.summary.scanned_files == 6
+    assert updates[0].total_files == 6
+    assert updates[-1].completed_files == 6
+    assert updates[-1].scanned_files == 6
+
+
+def test_file_limit_marks_scan_incomplete(scanner: SecretScanner, tmp_path: Path) -> None:
+    for index in range(5):
+        (tmp_path / f"file-{index}.txt").write_text("safe\n", encoding="utf-8")
+
+    result = scanner.scan_path(tmp_path, max_files=2)
+
+    assert result.summary.discovered_files == 5
+    assert result.summary.scanned_files == 2
+    assert result.summary.incomplete
+    assert "file limit" in (result.summary.incomplete_reason or "")

@@ -7,45 +7,46 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/secretscanner?label=PyPI)](https://pypi.org/project/secretscanner/)
 
-SecretScanner ��һ���������С�Ĭ��������������Ϣɨ��������������˿����ߡ��γ���Ŀ�Ϳ�Դ�ֿ⣬��ɨ���ļ���Ŀ¼��Git ���������ݴ��������к����޵��ύ��ʷ���������նˡ�JSON �� SARIF ���档
+SecretScanner 是一个本地运行、默认脱敏的敏感信息扫描器。它面向个人开发者、课程项目和开源仓库，可扫描文件、目录、Git 工作区、暂存区新增行和有限的提交历史，并生成终端、JSON 或 SARIF 报告。
 
-���м����ڱ�����ɡ����߲���������֤ƾ�ݣ������ϴ��ļ���Ҳ���᳢�Ե�¼�κη���
+所有检测均在本机完成。工具不会联网验证凭据，不会上传文件，也不会尝试登录任何服务。
 
-## Ϊʲôʹ�� SecretScanner
+## 为什么使用 SecretScanner
 
-������Ϣ���ʺ����뿪�����ߵ���ǰ�����֡�SecretScanner �ṩһ��������Ƶ� Python CLI����Ŀ¼ɨ�衢�ݴ�����顢������ʷɨ�衢baseline �� SARIF ����ͬһ�����ع����С�Ĭ����������ȷ���˳���ʹ�����ʺϸ���ʹ�ã�Ҳ�ʺϽ��� CI��
+敏感信息最适合在离开开发者电脑前被发现。SecretScanner 提供一个容易审计的 Python CLI，把目录扫描、暂存区检查、有限历史扫描、baseline 和 SARIF 放在同一个本地工具中。默认脱敏和明确的退出码使它既适合个人使用，也适合接入 CI。
 
-## ����
+## 功能
 
-- ���� AWS��GitHub��GitLab��Slack��Stripe��Google��JWT��˽Կ�����ݿ� URL��`.env` ��ͨ���������
-- Shannon �ؼ�⣬�Զ��ų����� UUID ��ɢ��ֵ
-- Ĭ������ƥ��ֵ��JSON��SARIF����־�� baseline ��ʹ����������
-- ֧�� `.secretscannerignore`��·��/����/ָ�ư���������������
-- ֧�� YAML/TOML ���á����򿪹ء����ؼ��𸲸Ǻ��Զ����������
-- ������ CLI��pre-commit hook �� GitHub Actions ���
-- �ȶ��˳��룺`0` ����Ϸ��֣�`1` �ﵽ��ֵ��`2` ���û����д���
+- 内置 AWS、GitHub、GitLab、Slack、Stripe、Google、JWT、私钥、数据库 URL、`.env` 和通用密码规则
+- Shannon 熵检测，自动排除常见 UUID 与散列值
+- 默认隐藏匹配值；JSON、SARIF、日志和 baseline 均使用脱敏内容
+- 支持 `.secretscannerignore`、路径/规则/指纹白名单和行内抑制
+- 支持 YAML/TOML 配置、规则开关、严重级别覆盖和自定义正则规则
+- 多线程文件扫描、实时进度条、文件数量与时间安全边界
+- 可用作 CLI、pre-commit hook 和 GitHub Actions 检查
+- 稳定退出码：`0` 无阻断发现，`1` 达到阈值，`2` 配置或运行错误
 
-## ֧�ֵ�������Ϣ
+## 支持的敏感信息
 
-| ��� | ʾ�� | Ĭ�ϼ��� |
+| 类别 | 示例 | 默认级别 |
 | --- | --- | --- |
-| ��ƾ�� | AWS Access Key��AWS Secret Key��Google API Key | high / critical |
-| �����й� | GitHub PAT/OAuth��GitLab Token | high / critical |
-| ��Ϣ��֧�� | Slack Token��Stripe live key | high / critical |
-| ��Կ���� | PEM��RSA��OpenSSH��EC ˽Կͷ | critical |
-| Ӧ��ƾ�� | ���ݿ� URL��`.env` ���б�����ͨ�����븳ֵ | high / critical |
+| 云凭据 | AWS Access Key、AWS Secret Key、Google API Key | high / critical |
+| 代码托管 | GitHub PAT/OAuth、GitLab Token | high / critical |
+| 消息与支付 | Slack Token、Stripe live key | high / critical |
+| 密钥材料 | PEM、RSA、OpenSSH、EC 私钥头 | critical |
+| 应用凭据 | 数据库 URL、`.env` 敏感变量、通用密码赋值 | high / critical |
 | Token | JWT | medium |
-| ����ʽ | ��������ַ��� | medium |
+| 启发式 | 高熵随机字符串 | medium |
 
-## ��װ
+## 安装
 
-��Ҫ Python 3.11 ����߰汾��
+需要 Python 3.11 或更高版本。
 
 ```bash
 pipx install secretscanner
 ```
 
-��Դ�밲װ�����汾��
+从源码安装开发版本：
 
 ```bash
 git clone https://github.com/aidileide/SecretScanner.git
@@ -54,39 +55,47 @@ python -m venv .venv
 python -m pip install -e ".[dev]"
 ```
 
-## ����ʹ��
+## 快速使用
 
 ```bash
-# �ݹ�ɨ�赱ǰĿ¼
+# 递归扫描当前目录
 secretscanner scan .
 
-# ɨ�赥���ļ������ JSON
+# 扫描单个文件并输出 JSON
 secretscanner scan settings.py --format json --output result.json
 
-# ɨ�� Git �Ѹ����ļ���������δ�����ļ�
+# 扫描 Git 已跟踪文件，并包含未跟踪文件
 secretscanner git . --include-untracked
 
-# ֻɨ���ݴ��������У��ʺ��ύǰ���
+# 只扫描暂存区新增行，适合提交前检查
 secretscanner staged .
 
-# ɨ����� 50 ���ύ��������
+# 扫描最近 50 个提交的新增行
 secretscanner history . --max-commits 50
 
-# ���� GitHub Code Scanning �ɶ��� SARIF
+# 生成 GitHub Code Scanning 可读的 SARIF
 secretscanner scan . --format sarif --output secrets.sarif
 
-# �鿴�������������
+# 查看规则和最终配置
 secretscanner rules
 secretscanner config .
 ```
 
-��ȫ��ʾֵ��**Example only �� not a real credential**����
+大型目录可控制并发和扫描边界：
+
+```bash
+secretscanner scan . --workers 8 --max-files 50000 --timeout 300
+```
+
+如果达到文件数量或时间上限，报告会标记 `incomplete`，进程返回退出码 `2`，避免 CI 将部分扫描误判为安全。
+
+安全演示值（**Example only — not a real credential**）：
 
 ```text
 DEMO_API_KEY = "DEMO_NOT_REAL_123456789"
 ```
 
-���������
+典型输出：
 
 ```text
 SecretScanner
@@ -97,21 +106,25 @@ Recommendation: Revoke or rotate this credential and move it to a secret manager
 Scanned files: 842  High: 1  Total: 1  Elapsed: 1.28s
 ```
 
-Ĭ���� `high` �����Ϸ���ʱ�����˳��� `1`���ɵ�����ֵ��
+默认在 `high` 及以上发现时返回退出码 `1`。可调整阈值：
 
 ```bash
 secretscanner scan . --fail-on medium
 ```
 
-## ����
+## 配置
 
-SecretScanner ���Ŀ��·�����ϲ��� `.secretscanner.yml`��`.secretscanner.yaml` �� `.secretscanner.toml`������ʾ���� [`.secretscanner.example.yml`](.secretscanner.example.yml)��
+SecretScanner 会从目标路径向上查找 `.secretscanner.yml`、`.secretscanner.yaml` 或 `.secretscanner.toml`。完整示例见 [`.secretscanner.example.yml`](.secretscanner.example.yml)。
 
 ```yaml
 scan:
   max_file_size_mb: 5
   entropy: true
   follow_symlinks: false
+  workers: 4
+  max_files: 50000
+  timeout_seconds: 300
+  max_findings_per_rule_per_file: 20
 
 exclude:
   - "fixtures/**"
@@ -139,7 +152,7 @@ custom_rules:
     remediation: Rotate this token and store it outside source control.
 ```
 
-����������д�� `.secretscannerignore`���﷨�� `.gitignore` ���ƣ�
+额外忽略项可写入 `.secretscannerignore`，语法与 `.gitignore` 类似：
 
 ```gitignore
 tests/fixtures/
@@ -147,7 +160,7 @@ docs/generated/
 *.snapshot
 ```
 
-��ȷ�ϰ�ȫ�ĵ���ʾ������ʹ�þ�ȷ���ƣ�
+对确认安全的单行示例，可使用精确抑制：
 
 ```python
 example = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # secretscanner: allow
@@ -158,18 +171,18 @@ example_two = "github_pat_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## Baseline
 
-Baseline ֻ���淢��ָ�ƣ����������Ļ��������ƥ�����ݣ�
+Baseline 只保存发现指纹，不保存明文或脱敏后的匹配内容：
 
 ```bash
 secretscanner baseline create . --output .secretscanner-baseline.json
 secretscanner scan . --baseline .secretscanner-baseline.json
 ```
 
-����ֻ�����˹�ȷ�ϵ���ʷ���ֽ��� baseline�����ڴ�������м�� baseline �仯��
+建议只对已人工确认的历史发现建立 baseline，并在代码审查中检查 baseline 变化。
 
-## JSON �� SARIF
+## JSON 与 SARIF
 
-JSON �ʺϽű�������SARIF 2.1.0 �ɹ� GitHub Code Scanning ʹ�á����ָ�ʽĬ��ֻ��������ƥ��ֵ���Ҳ��ḽ������Դ�����У�
+JSON 适合脚本处理，SARIF 2.1.0 可供 GitHub Code Scanning 使用。两种格式默认只包含脱敏匹配值，且不会附带完整源代码行：
 
 ```bash
 secretscanner scan . --format json --output secrets.json
@@ -186,26 +199,26 @@ repos:
       - id: secretscanner
 ```
 
-hook Ĭ��ִ�� `secretscanner staged .`��ֻ���׼���ύ�������С�
+hook 默认执行 `secretscanner staged .`，只检查准备提交的新增行。
 
 ## GitHub Actions
 
-�ֿ��Դ� [������Ϣɨ�蹤����](.github/workflows/secrets.yml)�������� SARIF ���ϴ��� GitHub Code Scanning��˽�вֿ��δ���� Code Scanning ʱ����ɾ���ϴ����裬CLI �����Ȼ��Ч��
+仓库自带 [敏感信息扫描工作流](.github/workflows/secrets.yml)，会生成 SARIF 并上传到 GitHub Code Scanning。私有仓库或未启用 Code Scanning 时，可删除上传步骤，CLI 检查仍然有效。
 
-## ��ȫ�߽�
+## 安全边界
 
-- ������ؼ����ܲ����󱨻�©�������������Կ�ֻ�����������ר�����ܹ���ϵͳ��
-- Ĭ�����ֻ������β�����ַ���`--show-secrets` ���ƥ��ֵд���ն˻򱨸��У������ܿر��ػ���ʹ�á�
-- ���߲������Զ�� API ��֤ƾ�ݣ�����ִ��ɨ�赽�Ĵ��룬Ҳ�����Զ��޸�Ŀ���ļ���
-- ����ʵ��Կ������ Git ��ʷ����ɾ���ļ�������Ӧ�����������ֻ���Կ����������ʷ��
+- 规则和熵检测可能产生误报或漏报，不能替代密钥轮换、代码审查和专用秘密管理系统。
+- 默认输出只保留首尾少量字符。`--show-secrets` 会把匹配值写到终端或报告中，仅在受控本地环境使用。
+- 工具不会调用远程 API 验证凭据，不会执行扫描到的代码，也不会自动修改目标文件。
+- 若真实密钥曾进入 Git 历史，仅删除文件不够；应立即吊销或轮换密钥，再清理历史。
 
-## ��˽
+## 隐私
 
-ɨ�衢���ˡ�����ָ�ƺͱ�����ڱ�����ɡ�SecretScanner ������ң�⡢Զ����֤���ϴ��߼���GitHub Actions �е� SARIF �ϴ��ǲֿ⹤������ʽִ�е� GitHub �ٷ����裻����Ҫ Code Scanning ʱ��ɾ���ò��衣
+扫描、过滤、生成指纹和报告均在本地完成。SecretScanner 不包含遥测、远程验证或上传逻辑。GitHub Actions 中的 SARIF 上传是仓库工作流显式执行的 GitHub 官方步骤；不需要 Code Scanning 时可删除该步骤。
 
-���ְ�ȫ�������Ķ� [SECURITY.md](SECURITY.md)�����뿪�����Ķ� [CONTRIBUTING.md](CONTRIBUTING.md)��
+发现安全问题请阅读 [SECURITY.md](SECURITY.md)。参与开发请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-## ����
+## 开发
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -218,11 +231,11 @@ twine check dist/*
 
 ## Roadmap
 
-- **v0.1**���ļ�ϵͳ��Git ���������ݴ�������ʷ���ؼ�⡢baseline��allowlist��JSON��SARIF��pre-commit
-- **v0.2**���������Git ��ʷ�����Ż����ɹ��������
-- **v0.3**��IDE ���ɡ�VS Code ��չ����ѡ GitHub App
-- **v0.4**����ѡ�ı��� Web UI
+- **v0.1**：文件系统、Git 工作区、暂存区、历史、熵检测、baseline、allowlist、JSON、SARIF、pre-commit
+- **v0.2**：更多规则、Git 历史性能优化、可共享规则包
+- **v0.3**：IDE 集成、VS Code 扩展、可选 GitHub App
+- **v0.4**：可选的本地 Web UI
 
-## ����֤
+## 许可证
 
 [MIT](LICENSE)

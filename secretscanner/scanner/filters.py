@@ -13,6 +13,7 @@ DEFAULT_IGNORES = [
     ".git/",
     ".pytest_cache/",
     ".ruff_cache/",
+    ".cache/",
     "node_modules/",
     ".venv/",
     "venv/",
@@ -25,6 +26,7 @@ DEFAULT_IGNORES = [
     ".next/",
     ".idea/",
     ".vscode/",
+    "site-packages/",
 ]
 LOW_RISK_WORDS = {
     "example",
@@ -42,6 +44,17 @@ LOW_RISK_WORDS = {
     "not_real",
 }
 HIGH_RISK_WORDS = {"production", "prod", "live", "credential", "private_key", "secret", "token"}
+ENTROPY_IGNORED_NAMES = {
+    "known_hosts",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "uv.lock",
+    "poetry.lock",
+    "cargo.lock",
+    "asset-table.js",
+}
+ENTROPY_IGNORED_SUFFIXES = {".lock", ".map", ".smali", ".svg", ".xml"}
 
 
 def load_ignore_spec(root: Path, extra: list[str]) -> pathspec.PathSpec:
@@ -62,6 +75,15 @@ def confidence_for_context(base: Confidence, context: str) -> Confidence:
     if any(word in lowered for word in HIGH_RISK_WORDS):
         return Confidence.HIGH
     return base
+
+
+def entropy_allowed_for_path(path: str) -> bool:
+    candidate = Path(path)
+    name = candidate.name.lower()
+    return (
+        name not in ENTROPY_IGNORED_NAMES
+        and candidate.suffix.lower() not in ENTROPY_IGNORED_SUFFIXES
+    )
 
 
 def is_inline_allowed(lines: list[str], line_index: int) -> bool:

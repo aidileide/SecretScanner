@@ -67,19 +67,34 @@ class Finding:
 class ScanSummary:
     scanned_files: int = 0
     skipped_files: int = 0
+    discovered_files: int = 0
     elapsed_seconds: float = 0.0
+    incomplete: bool = False
+    incomplete_reason: str | None = None
 
-    def counts(self, findings: list[Finding]) -> dict[str, int | float]:
+    def counts(self, findings: list[Finding]) -> dict[str, int | float | bool | str | None]:
         by_severity = {severity.value: 0 for severity in Severity}
         for finding in findings:
             by_severity[finding.severity.value] += 1
         return {
             "scanned_files": self.scanned_files,
             "skipped_files": self.skipped_files,
+            "discovered_files": self.discovered_files,
             **by_severity,
             "total": len(findings),
             "elapsed_seconds": round(self.elapsed_seconds, 3),
+            "incomplete": self.incomplete,
+            "incomplete_reason": self.incomplete_reason,
         }
+
+
+@dataclass(frozen=True, slots=True)
+class ScanProgress:
+    total_files: int
+    completed_files: int
+    scanned_files: int
+    skipped_files: int
+    current_file: str = ""
 
 
 @dataclass(slots=True)

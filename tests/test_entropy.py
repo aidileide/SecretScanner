@@ -1,4 +1,5 @@
 from secretscanner.scanner.entropy import entropy_candidates, shannon_entropy
+from secretscanner.scanner.filters import entropy_allowed_for_path
 
 
 def test_entropy_finds_random_looking_token() -> None:
@@ -12,3 +13,12 @@ def test_entropy_ignores_uuid_and_sha256() -> None:
     sha = "d2a57dc1d883fd21fb9951699df71cc7d1587d58728f6ab36b1bfc78dc9a455f"
     assert entropy_candidates(uuid) == []
     assert entropy_candidates(sha) == []
+
+
+def test_entropy_skips_generated_and_host_key_files() -> None:
+    assert not entropy_allowed_for_path("known_hosts")
+    assert not entropy_allowed_for_path("frontend/package-lock.json")
+    assert not entropy_allowed_for_path("assets/app.js.map")
+    assert not entropy_allowed_for_path("plugins/asset-table.js")
+    assert not entropy_allowed_for_path("smali_classes2/example/Client.smali")
+    assert not entropy_allowed_for_path("res/values/strings.xml")

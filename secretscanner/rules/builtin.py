@@ -32,6 +32,7 @@ def builtin_rules() -> list[Rule]:
             Confidence.HIGH,
             ROTATE_TOKEN,
             frozenset({"aws", "cloud"}),
+            keywords=frozenset({"akia", "asia"}),
         ),
         Rule(
             "aws-secret-key",
@@ -42,6 +43,7 @@ def builtin_rules() -> list[Rule]:
             Severity.CRITICAL,
             Confidence.HIGH,
             ROTATE_TOKEN,
+            keywords=frozenset({"aws_secret_access_key", "aws_secret_key"}),
             match_group=1,
             validator=is_plausible_secret,
         ),
@@ -54,6 +56,7 @@ def builtin_rules() -> list[Rule]:
             Severity.CRITICAL,
             Confidence.HIGH,
             ROTATE_TOKEN,
+            keywords=frozenset({"ghp_", "gho_", "ghu_", "ghs_", "ghr_"}),
         ),
         Rule(
             "github-fine-grained-token",
@@ -64,6 +67,7 @@ def builtin_rules() -> list[Rule]:
             Severity.CRITICAL,
             Confidence.HIGH,
             ROTATE_TOKEN,
+            keywords=frozenset({"github_pat_"}),
         ),
         Rule(
             "gitlab-token",
@@ -74,6 +78,7 @@ def builtin_rules() -> list[Rule]:
             Severity.HIGH,
             Confidence.HIGH,
             ROTATE_TOKEN,
+            keywords=frozenset({"glpat-"}),
         ),
         Rule(
             "slack-token",
@@ -84,6 +89,7 @@ def builtin_rules() -> list[Rule]:
             Severity.HIGH,
             Confidence.HIGH,
             ROTATE_TOKEN,
+            keywords=frozenset({"xoxb-", "xoxa-", "xoxp-", "xoxr-", "xoxs-"}),
         ),
         Rule(
             "stripe-live-key",
@@ -94,6 +100,7 @@ def builtin_rules() -> list[Rule]:
             Severity.CRITICAL,
             Confidence.HIGH,
             ROTATE_TOKEN,
+            keywords=frozenset({"sk_live_", "rk_live_"}),
         ),
         Rule(
             "google-api-key",
@@ -104,6 +111,7 @@ def builtin_rules() -> list[Rule]:
             Severity.HIGH,
             Confidence.HIGH,
             ROTATE_TOKEN,
+            keywords=frozenset({"aiza"}),
         ),
         Rule(
             "jwt",
@@ -114,6 +122,7 @@ def builtin_rules() -> list[Rule]:
             Severity.MEDIUM,
             Confidence.MEDIUM,
             ROTATE_TOKEN,
+            keywords=frozenset({"eyj"}),
         ),
         Rule(
             "private-key",
@@ -124,6 +133,7 @@ def builtin_rules() -> list[Rule]:
             Severity.CRITICAL,
             Confidence.HIGH,
             ROTATE_KEY,
+            keywords=frozenset({"-----begin"}),
         ),
         Rule(
             "database-url",
@@ -134,6 +144,9 @@ def builtin_rules() -> list[Rule]:
             Severity.CRITICAL,
             Confidence.HIGH,
             CHANGE_PASSWORD,
+            keywords=frozenset(
+                {"postgres://", "postgresql://", "mysql://", "mongodb://", "redis://"}
+            ),
             validator=has_database_password,
         ),
         Rule(
@@ -145,6 +158,9 @@ def builtin_rules() -> list[Rule]:
             Severity.HIGH,
             Confidence.HIGH,
             CHANGE_PASSWORD,
+            keywords=frozenset(
+                {"api_key", "secret", "token", "password", "database_url", "private_key"}
+            ),
             file_extensions=frozenset({".env"}),
             match_group=1,
             validator=is_plausible_secret,
@@ -158,6 +174,9 @@ def builtin_rules() -> list[Rule]:
             Severity.HIGH,
             Confidence.MEDIUM,
             CHANGE_PASSWORD,
+            keywords=frozenset(
+                {"password", "passwd", "pwd", "secret", "token", "api_key", "api-key"}
+            ),
             match_group=1,
             validator=is_plausible_secret,
         ),
