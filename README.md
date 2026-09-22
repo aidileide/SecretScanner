@@ -1,12 +1,19 @@
 # SecretScanner
 
+> Find secrets before they reach your repository.
+
 [![Tests](https://github.com/aidileide/SecretScanner/actions/workflows/tests.yml/badge.svg)](https://github.com/aidileide/SecretScanner/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/secretscanner?label=PyPI)](https://pypi.org/project/secretscanner/)
 
 SecretScanner ��һ���������С�Ĭ��������������Ϣɨ��������������˿����ߡ��γ���Ŀ�Ϳ�Դ�ֿ⣬��ɨ���ļ���Ŀ¼��Git ���������ݴ��������к����޵��ύ��ʷ���������նˡ�JSON �� SARIF ���档
 
 ���м����ڱ�����ɡ����߲���������֤ƾ�ݣ������ϴ��ļ���Ҳ���᳢�Ե�¼�κη���
+
+## Ϊʲôʹ�� SecretScanner
+
+������Ϣ���ʺ����뿪�����ߵ���ǰ�����֡�SecretScanner �ṩһ��������Ƶ� Python CLI����Ŀ¼ɨ�衢�ݴ�����顢������ʷɨ�衢baseline �� SARIF ����ͬһ�����ع����С�Ĭ����������ȷ���˳���ʹ�����ʺϸ���ʹ�ã�Ҳ�ʺϽ��� CI��
 
 ## ����
 
@@ -17,6 +24,18 @@ SecretScanner ��һ���������С�Ĭ��������
 - ֧�� YAML/TOML ���á����򿪹ء����ؼ��𸲸Ǻ��Զ����������
 - ������ CLI��pre-commit hook �� GitHub Actions ���
 - �ȶ��˳��룺`0` ����Ϸ��֣�`1` �ﵽ��ֵ��`2` ���û����д���
+
+## ֧�ֵ�������Ϣ
+
+| ��� | ʾ�� | Ĭ�ϼ��� |
+| --- | --- | --- |
+| ��ƾ�� | AWS Access Key��AWS Secret Key��Google API Key | high / critical |
+| �����й� | GitHub PAT/OAuth��GitLab Token | high / critical |
+| ��Ϣ��֧�� | Slack Token��Stripe live key | high / critical |
+| ��Կ���� | PEM��RSA��OpenSSH��EC ˽Կͷ | critical |
+| Ӧ��ƾ�� | ���ݿ� URL��`.env` ���б�����ͨ�����븳ֵ | high / critical |
+| Token | JWT | medium |
+| ����ʽ | ��������ַ��� | medium |
 
 ## ��װ
 
@@ -59,6 +78,23 @@ secretscanner scan . --format sarif --output secrets.sarif
 # �鿴�������������
 secretscanner rules
 secretscanner config .
+```
+
+��ȫ��ʾֵ��**Example only �� not a real credential**����
+
+```text
+DEMO_API_KEY = "DEMO_NOT_REAL_123456789"
+```
+
+���������
+
+```text
+SecretScanner
+HIGH  GitHub Token  src/config.py:18:9
+ghp_****************************9xyz
+Recommendation: Revoke or rotate this credential and move it to a secret manager.
+
+Scanned files: 842  High: 1  Total: 1  Elapsed: 1.28s
 ```
 
 Ĭ���� `high` �����Ϸ���ʱ�����˳��� `1`���ɵ�����ֵ��
@@ -131,6 +167,15 @@ secretscanner scan . --baseline .secretscanner-baseline.json
 
 ����ֻ�����˹�ȷ�ϵ���ʷ���ֽ��� baseline�����ڴ�������м�� baseline �仯��
 
+## JSON �� SARIF
+
+JSON �ʺϽű�������SARIF 2.1.0 �ɹ� GitHub Code Scanning ʹ�á����ָ�ʽĬ��ֻ��������ƥ��ֵ���Ҳ��ḽ������Դ�����У�
+
+```bash
+secretscanner scan . --format json --output secrets.json
+secretscanner scan . --format sarif --output secrets.sarif
+```
+
 ## pre-commit
 
 ```yaml
@@ -154,6 +199,10 @@ hook Ĭ��ִ�� `secretscanner staged .`��ֻ���׼���ύ�
 - ���߲������Զ�� API ��֤ƾ�ݣ�����ִ��ɨ�赽�Ĵ��룬Ҳ�����Զ��޸�Ŀ���ļ���
 - ����ʵ��Կ������ Git ��ʷ����ɾ���ļ�������Ӧ�����������ֻ���Կ����������ʷ��
 
+## ��˽
+
+ɨ�衢���ˡ�����ָ�ƺͱ�����ڱ�����ɡ�SecretScanner ������ң�⡢Զ����֤���ϴ��߼���GitHub Actions �е� SARIF �ϴ��ǲֿ⹤������ʽִ�е� GitHub �ٷ����裻����Ҫ Code Scanning ʱ��ɾ���ò��衣
+
 ���ְ�ȫ�������Ķ� [SECURITY.md](SECURITY.md)�����뿪�����Ķ� [CONTRIBUTING.md](CONTRIBUTING.md)��
 
 ## ����
@@ -166,6 +215,13 @@ pytest
 python -m build
 twine check dist/*
 ```
+
+## Roadmap
+
+- **v0.1**���ļ�ϵͳ��Git ���������ݴ�������ʷ���ؼ�⡢baseline��allowlist��JSON��SARIF��pre-commit
+- **v0.2**���������Git ��ʷ�����Ż����ɹ��������
+- **v0.3**��IDE ���ɡ�VS Code ��չ����ѡ GitHub App
+- **v0.4**����ѡ�ı��� Web UI
 
 ## ����֤
 

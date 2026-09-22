@@ -32,3 +32,15 @@ def test_size_limit_skips_large_file(scanner: SecretScanner, tmp_path: Path) -> 
 def test_missing_target_is_controlled_error(scanner: SecretScanner, tmp_path: Path) -> None:
     with pytest.raises(SecretScannerError, match="does not exist"):
         scanner.scan_path(tmp_path / "missing")
+
+
+def test_symlink_is_not_followed_by_default(scanner: SecretScanner, tmp_path: Path) -> None:
+    target = tmp_path / "target.txt"
+    target.write_text("ghp_" + "E" * 36, encoding="utf-8")  # secretscanner: allow
+    link = tmp_path / "linked.txt"
+    try:
+        link.symlink_to(target)
+    except OSError:
+        pytest.skip("Symlink creation is unavailable on this system")
+    result = scanner.scan_path(link)
+    assert result.findings == []

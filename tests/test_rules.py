@@ -36,6 +36,16 @@ def test_detects_generic_password(scanner: SecretScanner) -> None:
     assert any(item.rule_id == "generic-password" for item in findings)
 
 
+def test_jwt_is_medium_severity(scanner: SecretScanner) -> None:
+    jwt = (
+        # secretscanner: allow-next-line
+        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.c2lnbmF0dXJlMTIzNDU2"
+    )
+    findings = scan(scanner, f'bearer = "{jwt}"')  # secretscanner: allow
+    finding = next(item for item in findings if item.rule_id == "jwt")
+    assert finding.severity.value == "medium"
+
+
 def test_placeholder_password_is_ignored(scanner: SecretScanner) -> None:
     findings = scan(scanner, 'password = "changeme"  # example')
     assert not any(item.rule_id == "generic-password" for item in findings)

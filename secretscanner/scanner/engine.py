@@ -45,7 +45,7 @@ class SecretScanner:
         follow_symlinks: bool | None = None,
     ) -> ScanResult:
         started = time.perf_counter()
-        target = target.expanduser().resolve()
+        target = target.expanduser().absolute()
         if not target.exists():
             raise SecretScannerError(f"Scan target does not exist: {target}")
         root = target if target.is_dir() else target.parent
