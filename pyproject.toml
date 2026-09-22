@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling>=1.25,<1.32"]
+build-backend = "hatchling.build"
+
+[project]
+name = "secretscanner"
+version = "0.1.0"
+description = "A local, fast, masked-by-default secret and credential scanner."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "SecretScanner contributors" }]
+keywords = ["security", "secrets", "credentials", "git", "sarif", "pre-commit"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Security",
+]
+dependencies = [
+  "pathspec>=0.12,<1",
+  "pyyaml>=6,<7",
+  "rich>=13,<15",
+  "typer>=0.15,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2,<2",
+  "pytest>=8,<10",
+  "ruff>=0.11,<1",
+  "twine>=5,<7",
+]
+
+[project.urls]
+Homepage = "https://github.com/aidileide/SecretScanner"
+Issues = "https://github.com/aidileide/SecretScanner/issues"
+
+[project.scripts]
+secretscanner = "secretscanner.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["secretscanner"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "S"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S603", "S607"]
+"secretscanner/rules/builtin.py" = ["S105"]

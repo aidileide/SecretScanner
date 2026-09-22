@@ -1,0 +1,7 @@
+- id: secretscanner
+  name: SecretScanner staged secret scan
+  description: Scan staged added lines for credentials and sensitive values.
+  entry: secretscanner staged .
+  language: python
+  pass_filenames: false
+  stages: [pre-commit]
