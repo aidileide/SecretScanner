@@ -15,3 +15,15 @@ def test_findings_are_capped_per_rule_per_file() -> None:
 
     github_findings = [item for item in findings if item.rule_id == "github-token"]
     assert len(github_findings) == 3
+
+
+def test_findings_are_capped_when_tokens_share_one_line() -> None:
+    scanner = SecretScanner(
+        ScannerConfig(max_findings_per_rule_per_file=3, entropy=False),
+        RuleRegistry(builtin_rules()),
+    )
+    line = " ".join("ghp_" + f"A{i:02d}" * 12 for i in range(10))
+
+    findings = scanner.scan_lines([line], "tokens.txt", source_type=SourceType.FILESYSTEM)
+
+    assert len([item for item in findings if item.rule_id == "github-token"]) == 3

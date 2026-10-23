@@ -179,6 +179,8 @@ class SecretScanner:
                 if rule.keywords and not any(keyword in lowered_line for keyword in rule.keywords):
                     continue
                 for match in rule.compiled.finditer(line):
+                    if rule_counts[rule.rule_id] >= finding_limit:
+                        break
                     if context is None:
                         context = "\n".join(lines[max(0, index - 2) : index + 3])
                     try:

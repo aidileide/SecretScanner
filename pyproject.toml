@@ -3,7 +3,7 @@ requires = ["hatchling>=1.25,<1.32"]
 build-backend = "hatchling.build"
 
 [project]
-name = "secretscanner"
+name = "aidileide-secretscanner"
 version = "0.1.1"
 description = "A local, fast, masked-by-default secret and credential scanner."
 readme = "README.md"
