@@ -1,11 +1,12 @@
 # SecretScanner
 
+[English](README.en.md) | 简体中文
+
 > Find secrets before they reach your repository.
 
 [![Tests](https://github.com/aidileide/SecretScanner/actions/workflows/tests.yml/badge.svg)](https://github.com/aidileide/SecretScanner/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/secretscanner?label=PyPI)](https://pypi.org/project/secretscanner/)
 
 SecretScanner 是一个本地运行、默认脱敏的敏感信息扫描器。它面向个人开发者、课程项目和开源仓库，可扫描文件、目录、Git 工作区、暂存区新增行和有限的提交历史，并生成终端、JSON 或 SARIF 报告。
 
@@ -42,9 +43,15 @@ SecretScanner 是一个本地运行、默认脱敏的敏感信息扫描器。它
 
 需要 Python 3.11 或更高版本。
 
+从本仓库安装（还需要 Git 和 pipx）：
+
 ```bash
-pipx install secretscanner
+pipx install "git+https://github.com/aidileide/SecretScanner.git"
 ```
+
+本项目尚未发布到 PyPI。PyPI 的 `secretscanner` 属于其他作者，请勿使用
+`pip install secretscanner` 或 `pipx install secretscanner` 安装本项目。
+本项目的分发包名为 `aidileide-secretscanner`；命令和 Python 导入名仍为 `secretscanner`。
 
 从源码安装开发版本：
 
@@ -52,8 +59,23 @@ pipx install secretscanner
 git clone https://github.com/aidileide/SecretScanner.git
 cd SecretScanner
 python -m venv .venv
+```
+
+Windows PowerShell：
+
+```powershell
+.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
 ```
+
+macOS / Linux：
+
+```bash
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+```
+
+安装后运行 `secretscanner version` 验证来源版本。
 
 ## 快速使用
 
@@ -200,6 +222,7 @@ repos:
 ```
 
 hook 默认执行 `secretscanner staged .`，只检查准备提交的新增行。
+`rev` 应固定到已审核的标签或提交；使用当前修复时，请填入对应的合并提交 SHA。
 
 ## GitHub Actions
 

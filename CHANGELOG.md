@@ -4,6 +4,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed
+
+- Enforce per-rule finding limits when several credentials appear on one line.
+- Install from the maintained Git repository instead of an unrelated PyPI package.
+
+### Changed
+
+- Use `aidileide-secretscanner` as the distribution name; CLI and imports are unchanged.
+- Add English quick start, issue forms, Windows CI, and isolated wheel installation checks.
+
 ## [0.1.1] - 2026-09-22
 
 ### Added

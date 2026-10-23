@@ -10,10 +10,11 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +26,29 @@ jobs:
       - run: ruff format --check .
       - run: ruff check .
       - run: pytest
-      - if: matrix.python-version == '3.13'
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install build twine
+      - name: Validate lock file
+        run: python -c "import pathlib, tomllib; tomllib.loads(pathlib.Path('uv.lock').read_text(encoding='utf-8'))"
+      - run: python -m build
+      - run: python -m twine check dist/*
+      - name: Install wheel outside source tree
+        shell: bash
         run: |
-          python -m build
-          twine check dist/*
+          python -m venv "$RUNNER_TEMP/wheel-env"
+          "$RUNNER_TEMP/wheel-env/bin/python" -m pip install dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/wheel-env/bin/secretscanner" version
+          "$RUNNER_TEMP/wheel-env/bin/secretscanner" rules
+      - uses: actions/upload-artifact@v4
+        with:
+          name: secretscanner-dist
+          path: dist/
+          retention-days: 14
